@@ -1,0 +1,1 @@
+front_flank     rear_flank      real_base       indel_base      indel_len       repeat_len      repeat_count    microhomology   microhomology_length
