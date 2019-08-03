@@ -356,7 +356,7 @@ sanger <- sanger[match(context96.label,rownames(sanger),nomatch=0),]
 
 maf <- read.delim(paste(args[1],sep=""),header=T,sep='\t',as.is=T,comment='#')
 tumor.type <- "Samples" ### please specify your cohort name here
-x <- get.spectrum.with.indels(maf) ### getting input lego matrix (96 by # of samples)
+x <- get.spectrum96.from.maf(maf) ### getting input lego matrix (96 by # of samples)
 maf <- x[[1]]
 lego96 <- x[[2]]
 
@@ -377,7 +377,7 @@ a0 <- 10
 ############### Choose pirors for W and H
 ############### Default = L1KL (expoential priors); L2KL (half-normal priors)
 ##################################
-prior <- "L1KL" 
+prior <- "L2KL" 
 if (prior=="L1KL") {
 	method <- paste("L1KL.lego96",tumor.type,sep=".")
 } else {
