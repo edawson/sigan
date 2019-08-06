@@ -54,6 +54,7 @@ args <- commandArgs(trailingOnly = TRUE)
 library(gplots)
 library(ggplot2)
 library(reshape2)
+library(readr)
 source(paste("get.context96_annotated.from.maf.R",sep=""))
 ## One of "L1KL" (default, exponential priors) or "L2KL" (half-normal priors)
 prior <- "L2KL" 
@@ -74,9 +75,10 @@ plot.heatmap.2 <- function(x,rowTF,colTF,method,main) {
         mydist <- function(c) {dist(c,method="euclidean")}
         myclust <- function(c) {hclust(c,method=method)}
         heatmap.2(as.matrix(x), hclustfun=myclust, distfun=mydist, na.rm = TRUE, scale="none", dendrogram="both",margins=c(5,5),
-                Rowv=rowTF, Colv=colTF, symbreaks=FALSE, key=TRUE, symkey=F,main=main,
+                Rowv=rowTF, Colv=colTF, symbreaks=FALSE, key=TRUE, symkey=F,main="",
                 density.info="none", trace="none",labCol=colnames(x),labRow=rownames(x),col=redgreen(20),cex.lab=s2,cexRow=0.75,cexCol=0.75,keysize=s3)
 }
+
 
 plot.W.correlation <- function(W1,W2) {
         K1 <- ncol(W1)
@@ -143,7 +145,7 @@ BayesNMF.L1KL <- function(V0,n.iter,a0,tol,K,K0,phi) {
         return(list(W,H,n.like,n.evid,n.lambda,n.error))
 }
 
-## Bayesian NMF algorithm with hlaf-normal priors for W and H
+## Bayesian NMF algorithm with half-normal priors for W and H
 BayesNMF.L2KL <- function(V0,n.iter,a0,tol,K,K0,phi) {
         eps <- 1.e-50
         del <- 1.0
@@ -366,6 +368,11 @@ tumor.type <- args[2] ### please specify your cohort name here
 x <- get.spectrum96.from.maf(maf) ### getting input lego matrix (96 by # of samples)
 maf <- x[[1]]
 lego96 <- x[[2]]
+
+mut.counts <- lego96
+mut.counts$Mut_Type = context96.label
+
+write_csv(mut.counts, paste(args[1], "96context", "csv", sep="."))
 
 #####################################################
 ############## BayesNMF parameters
