@@ -55,6 +55,13 @@ library(gplots)
 library(ggplot2)
 library(reshape2)
 source(paste("get.context96_annotated.from.maf.R",sep=""))
+## One of "L1KL" (default, exponential priors) or "L2KL" (half-normal priors)
+prior <- "L2KL" 
+## Handle hypermutator samples
+hyper <- FALSE
+## Sample name
+sampleName <- args[2]
+
 
 ##########################################################
 ###################### R functions  ######################
@@ -355,7 +362,7 @@ sanger <- sanger[match(context96.label,rownames(sanger),nomatch=0),]
 ###########################################################
 
 maf <- read.delim(paste(args[1],sep=""),header=T,sep='\t',as.is=T,comment='#')
-tumor.type <- "Samples" ### please specify your cohort name here
+tumor.type <- args[2] ### please specify your cohort name here
 x <- get.spectrum96.from.maf(maf) ### getting input lego matrix (96 by # of samples)
 maf <- x[[1]]
 lego96 <- x[[2]]
@@ -377,7 +384,6 @@ a0 <- 10
 ############### Choose pirors for W and H
 ############### Default = L1KL (expoential priors); L2KL (half-normal priors)
 ##################################
-prior <- "L2KL" 
 if (prior=="L1KL") {
 	method <- paste("L1KL.lego96",tumor.type,sep=".")
 } else {
@@ -388,7 +394,6 @@ if (prior=="L1KL") {
 ##################################
 ############## Default = FALSE ; TRUE - to reduce the effect of hyper-mutant samples in the signature discovery
 ##################################
-hyper <- FALSE
 if (hyper) {
 	lego96 <- get.lego96.hyper(lego96)
 	method <- paste(method,"hyper",sep=".")
@@ -533,7 +538,7 @@ for (j in 1:n.K) {
 	dev.off()
 
 	main <- paste("Cosine similarity;",tumor.type,sep="")
-        pdf(file = paste(OUTPUT,paste(method,a0,"signature.comprison.sanger",K,"pdf",sep="."),sep=""),width=4,height=6)
+        pdf(file = paste(OUTPUT,paste(method,a0,"signature.comparison",K,"pdf",sep="."),sep=""),width=6,height=10)
                 s1 <- 1.5
                 s2 <- 2.0
                 par(mfrow=c(1,1))
