@@ -56,12 +56,16 @@ library(ggplot2)
 library(reshape2)
 library(readr)
 source(paste("get.context96_annotated.from.maf.R",sep=""))
+
 ## One of "L1KL" (default, exponential priors) or "L2KL" (half-normal priors)
 prior <- "L2KL" 
 ## Handle hypermutator samples
 hyper <- FALSE
 ## Sample name
 sampleName <- args[2]
+if sampleName == ""{
+        stop("No sample name provided. Please provide a sample name.")
+}
 
 
 ##########################################################
