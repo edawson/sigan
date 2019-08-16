@@ -62,10 +62,10 @@ prior <- "L2KL"
 ## Handle hypermutator samples
 hyper <- FALSE
 ## Sample name
-sampleName <- args[2]
-if sampleName == ""{
+if (args[2] == ""){
         stop("No sample name provided. Please provide a sample name.")
 }
+sampleName <- args[2]
 
 
 ##########################################################
