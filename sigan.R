@@ -355,7 +355,7 @@ sanger <- read.delim(paste("sigProfiler_SBS_signatures_2019_05_22.siganCompatibl
 base.change <- paste(substring(sanger[,1],1,1),substring(sanger[,1],3,3),sep="")
 context <- paste(substring(sanger[,2],1,1),substring(sanger[,2],3,3),sep="")
 rownames(sanger) <- paste(base.change,context,sep="")
-sanger <- sanger[,c(4:33)]
+sanger <- sanger[,c(4:70)]
 sanger <- sanger[match(context96.label,rownames(sanger),nomatch=0),]
 ##########################################################
 
