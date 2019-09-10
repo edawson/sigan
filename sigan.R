@@ -541,6 +541,7 @@ for (j in 1:n.K) {
 	##########################################################
         WH <- list(W.norm,H.mid,H.norm)
         save(WH,file=paste(OUTPUT,paste(method,a0,paste("MAP",K,sep=""),"WH.RData",sep="."),sep=""))
+        save(W.mid,file=paste(OUTPUT,paste(method,a0,paste("raw.sigs",K,sep=""),"W.mid.RData",sep="."),sep=""))
 
         ############# Activity plot
 	p1 <- plot.activity.barplot(H.mid,H.norm,1.0,tumor.type)
