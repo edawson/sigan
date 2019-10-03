@@ -49,28 +49,76 @@
 
 ##########################################################
 ###### Library imports
-
 args <- commandArgs(trailingOnly = TRUE)
 library(gplots)
 library(ggplot2)
 library(reshape2)
 library(readr)
+library(dplyr)
+library(stringr)
 source(paste("get.context96_annotated.from.maf.R",sep=""))
 
 ## One of "L1KL" (default, exponential priors) or "L2KL" (half-normal priors)
-prior <- "L2KL" 
+prior <- "L1KL"
 ## Handle hypermutator samples
 hyper <- FALSE
+## Default sample name
+sampleName = "SAMPLE"
+
+cat(length(args))
 ## Sample name
-if (args[2] == ""){
-        stop("No sample name provided. Please provide a sample name.")
+if ( length(args) < 2 | args[2] == ""){
+        cat("Usage: Rscript --vanilla sigan.R <MAF> <SAMPLE_NAME> [<PRIOR{L1KL|L2KL}> <HYPER>]")
+        stop("No sample name provided. Please provide a sample name. Whitespace is not permitted.")
 }
 sampleName <- args[2]
 
+if (length(args) > 2 & args[3] %in% c("L1KL", "L2KL")){
+    prior <- args[3]
+} else if (!is.na(args[3]) & ! args[3] %in% c("L1KL", "L2KL")){
+    cat(paste("Error: Invalid prior", args[3], sep = " " ))
+    stop()
+}
+if (lengths(args) > 3 & args[3] == "HYPER"){
+    hyper = TRUE
+} else{
+    hyper = FALSE
+}
 
 ##########################################################
 ###################### R functions  ######################
 ##########################################################
+
+
+arrange.vars <- function(data, vars){
+  ##stop if not a data.frame (but should work for matrices as well)
+  stopifnot(is.data.frame(data))
+  
+  ##sort out inputs
+  data.nms <- names(data)
+  var.nr <- length(data.nms)
+  var.nms <- names(vars)
+  var.pos <- vars
+  ##sanity checks
+  stopifnot( !any(duplicated(var.nms)), 
+             !any(duplicated(var.pos)) )
+  stopifnot( is.character(var.nms), 
+             is.numeric(var.pos) )
+  stopifnot( all(var.nms %in% data.nms) )
+  stopifnot( all(var.pos > 0), 
+             all(var.pos <= var.nr) )
+  
+  ##prepare output
+  out.vec <- character(var.nr)
+  out.vec[var.pos] <- var.nms
+  out.vec[-var.pos] <- data.nms[ !(data.nms %in% var.nms) ]
+  stopifnot( length(out.vec)==var.nr )
+  
+  ##re-arrange vars by position
+  data <- data[ , out.vec]
+  return(data)
+}
+
 
 plot.heatmap.2 <- function(x,rowTF,colTF,method,main) {
         s1 <- 0.75
@@ -376,7 +424,14 @@ lego96 <- x[[2]]
 mut.counts <- lego96
 mut.counts$Mut_Type = context96.label
 
-write_csv(mut.counts, paste(args[1], "96context", "csv", sep="."))
+mut.counts.out <- mut.counts %>%
+    mutate(Mutation_Type = paste(str_sub(Mut_Type,2,2), ">", str_sub(Mut_Type,3,3),sep="")) %>%
+    mutate(Trinucleotide = paste(str_sub(Mut_Type,1,1), str_sub(Mut_Type,2,2), str_sub(Mut_Type,4,4),sep="")) %>%
+    select(-Mut_Type)
+
+mut.counts.out <- arrange.vars(mut.counts.out, c("Mutation_Type"=1,"Trinucleotide"=2))
+write_csv(mut.counts.out, paste(args[1], "96context", "csv", sep="."))
+
 
 #####################################################
 ############## BayesNMF parameters
@@ -392,8 +447,8 @@ a0 <- 10
 ##################################
 
 ##################################
-############### Choose pirors for W and H
-############### Default = L1KL (expoential priors); L2KL (half-normal priors)
+############### Choose priors for W and H
+############### Default = L1KL (exponential priors); L2KL (half-normal priors)
 ##################################
 if (prior=="L1KL") {
 	method <- paste("L1KL.lego96",tumor.type,sep=".")
